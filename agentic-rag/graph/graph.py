@@ -16,7 +16,7 @@ def decide_to_generate(state):
 
     if state["web_search"]:
         print(
-            "---DECISION: NOT ALL DOCUMENTS ARE NOT RELEVANT TO QUESTION, INCLUDE WEB SEARCH---"
+            "---DECISION: NOT ALL DOCUMENTS ARE RELEVANT TO QUESTION, INCLUDE WEB SEARCH---"
         )
         return WEBSEARCH
     else:
@@ -52,7 +52,13 @@ def grade_generation_grounded_in_documents_and_question(state: GraphState) -> st
 def route_question(state: GraphState) -> str:
     print("---ROUTE QUESTION---")
     question = state["question"]
-    source: RouteQuery = question_router.invoke({"question": question})
+    subject = state.get("subject", "")
+    
+    source: RouteQuery = question_router.invoke({
+        "question": question, 
+        "subject": subject
+    })
+    
     if source.datasource == WEBSEARCH:
         print("---ROUTE QUESTION TO WEB SEARCH---")
         return WEBSEARCH
@@ -75,7 +81,7 @@ workflow.set_conditional_entry_point(
         RETRIEVE: RETRIEVE,
     },
 )
-# workflow.set_entry_point(RETRIEVE)
+
 workflow.add_edge(RETRIEVE, GRADE_DOCUMENTS)
 workflow.add_conditional_edges(
     GRADE_DOCUMENTS,
@@ -96,8 +102,7 @@ workflow.add_conditional_edges(
     },
 )
 workflow.add_edge(WEBSEARCH, GENERATE)
-workflow.add_edge(GENERATE, END)
 
 app = workflow.compile()
 
-app.get_graph().draw_mermaid_png(output_file_path="graph.png")
+# app.get_graph().draw_mermaid_png(output_file_path="graph.png")
