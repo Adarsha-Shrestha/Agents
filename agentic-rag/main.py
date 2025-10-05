@@ -1,409 +1,98 @@
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# from graph.graph import app
-# from graph.utils.source_extractor import format_sources_for_display
-# from graph.utils.conversational_detector import detect_conversational_query
-# from graph.utils.conversational_responses import generate_conversational_response
-
-# def main():
-#     print("=== Advanced RAG with Subject Filtering ===")
-#     print("Available subjects: DataMining, Network")
-#     print("Leave subject empty for general search")
-#     print("💡 Tip: Ask specific questions for better results!")
-#     print("-" * 50)
-    
-#     while True:
-#         question = input("\nEnter your question (or 'quit' to exit): ").strip()
-        
-#         if question.lower() == 'quit':
-#             print("Goodbye! 👋")
-#             break
-            
-#         if not question:
-#             print("Please enter a valid question.")
-#             continue
-        
-#         # Initialize input data with loop counter
-#         input_data = {
-#             "question": question,
-#             "loop_count": 0,
-#             "is_conversational": False
-#         }
-        
-#         # Only ask for subject if the question seems to be informational
-#         simple_greetings = ["hello", "hi", "hey", "thanks", "thank you", "how are you", "good morning", "good evening"]
-#         is_likely_greeting = any(greeting in question.lower() for greeting in simple_greetings)
-        
-#         if not is_likely_greeting:
-#             subject = input("Enter subject (DataMining/Network or press Enter for general): ").strip()
-            
-#             # Validate subject
-#             valid_subjects = ["DataMining", "Network"]
-#             if subject and subject not in valid_subjects:
-#                 print(f"Warning: '{subject}' is not a recognized subject. Available: {valid_subjects}")
-#                 subject = None
-            
-#             if subject:
-#                 input_data["subject"] = subject
-        
-#         print(f"\nProcessing: '{question}'")
-#         if input_data.get("subject"):
-#             print(f"Subject filter: {input_data['subject']}")
-        
-#         try:
-#             result = app.invoke(input=input_data)
-            
-#             # Check if it was a conversational response
-#             if result.get("is_conversational", False):
-#                 print("\n" + result.get("generation", "Hello! How can I help you?"))
-#                 continue
-            
-#             print("\n" + "="*50)
-#             print("ANSWER:")
-#             print("="*50)
-#             print(result.get("generation", "No answer generated"))
-            
-#             # Display sources only for informational queries
-#             sources = result.get("sources", [])
-#             if sources:
-#                 print("\n" + "="*50)
-#                 print("SOURCES:")
-#                 print("="*50)
-#                 formatted_sources = format_sources_for_display(sources)
-#                 print(formatted_sources)
-            
-#             print("="*50)
-            
-#         except Exception as e:
-#             print(f"❌ Error: {e}")
-#             print("💡 Try asking a more specific question about DataMining or Networks!")
-
-# if __name__ == "__main__":
-#     main()
-
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# from graph.graph import app
-# from graph.utils.source_extractor import format_sources_for_display
-# from graph.utils.conversational_detector import detect_conversational_query
-# from graph.utils.conversational_responses import generate_conversational_response
-# from graph.state import GraphState
-
-
-# def main():
-#     print("=== Advanced RAG with Subject Filtering ===")
-#     print("Available subjects: DataMining, Network")
-#     print("Leave subject empty for general search")
-#     print("💡 Tip: Ask specific questions for better results!")
-#     print("-" * 50)
-
-#     valid_subjects = ["DataMining", "Network"]
-
-#     while True:
-#         question = input("\nEnter your question (or 'quit' to exit): ").strip()
-
-#         if question.lower() == "quit":
-#             print("Goodbye! 👋")
-#             break
-
-#         if not question:
-#             print("Please enter a valid question.")
-#             continue
-
-#         # Use LLM-based conversational detector
-#         detection = detect_conversational_query(question)
-
-#         input_data = {
-#             "question": question,
-#             "loop_count": 0,
-#             "is_conversational": detection["is_conversational"],
-#         }
-
-#         # If conversational → handle directly
-#         if detection["is_conversational"]:
-#             state = GraphState(question=question)
-#             result = generate_conversational_response(state)
-#             print("\n" + result["generation"])
-#             continue
-
-#         # Otherwise → ask for subject
-#         subject = input("Enter subject (DataMining/Network or press Enter for general): ").strip()
-#         if subject and subject not in valid_subjects:
-#             print(f"⚠ '{subject}' is not a recognized subject. Available: {valid_subjects}")
-#             subject = None
-
-#         if subject:
-#             input_data["subject"] = subject
-
-#         print(f"\nProcessing: '{question}'")
-#         if input_data.get("subject"):
-#             print(f"Subject filter: {input_data['subject']}")
-
-#         try:
-#             result = app.invoke(input=input_data)
-
-#             # Check again if graph flagged conversational
-#             if result.get("is_conversational", False):
-#                 print("\n" + result.get("generation", "Hello! How can I help you?"))
-#                 continue
-
-#             print("\n" + "=" * 50)
-#             print("ANSWER:")
-#             print("=" * 50)
-#             print(result.get("generation", "No answer generated"))
-
-#             sources = result.get("sources", [])
-#             if sources:
-#                 print("\n" + "=" * 50)
-#                 print("SOURCES:")
-#                 print("=" * 50)
-#                 formatted_sources = format_sources_for_display(sources)
-#                 print(formatted_sources)
-
-#             print("=" * 50)
-
-#         except Exception as e:
-#             print(f"❌ Error: {e}")
-#             print("💡 Try asking a more specific question about DataMining or Networks!")
-
-
-# if __name__ == "__main__":
-#     main()
-
-# from dotenv import load_dotenv
-
-# load_dotenv()
-
-# from graph.graph import app
-# from graph.utils.source_extractor import format_sources_for_display
-# from graph.utils.conversational_detector import detect_conversational_query
-# from graph.utils.conversational_responses import generate_conversational_response
-# from graph.state import GraphState
-# from app2 import QuizSystem  # Quiz Generation System
-# from app3 import FlashcardSystem  # Flashcard Generation System
-
-
-
-# def main():
-#     print("=== Advanced RAG with Subject Filtering ===")
-#     print("Available subjects: DataMining, Network")
-#     print("Leave subject empty for general search")
-#     print("💡 Tip: Ask specific questions for better results!")
-#     print("-" * 50)
-
-#     valid_subjects = ["DataMining", "Network"]
-#     subject = None
-
-#     # Let the user pick subject first
-#     while True:
-#         subject_choice = input("Select subject (DataMining/Network or press Enter for general): ").strip()
-#         if not subject_choice:  # General mode
-#             subject = None
-#             print("Using general search (no subject filter).")
-#             break
-#         elif subject_choice in valid_subjects:
-#             subject = subject_choice
-#             print(f"Subject filter set to: {subject}")
-#             break
-#         else:
-#             print(f"⚠ '{subject_choice}' is not a recognized subject. Available: {valid_subjects}")
-
-#     # Main Q&A loop
-#     while True:
-#         question = input("\nEnter your question (or 'quit' to exit): ").strip()
-
-#         if question.lower() == 'quit':
-#             print("Goodbye! 👋")
-#             break
-          
-#         if not question:
-#             print("Please enter a valid question.")
-#             continue
-        
-#         detection = detect_conversational_query(question)
-
-#         input_data = {
-#             "question": question,
-#             "loop_count": 0,
-#             "is_conversational": detection["is_conversational"],
-#         }
-
-#         # If conversational → handle directly
-#         if detection["is_conversational"]:
-#             state = GraphState(question=question)
-#             result = generate_conversational_response(state)
-#             print("\n" + result["generation"])
-#             continue
-
-#         if subject:
-#             input_data["subject"] = subject
-
-#         print(f"\nProcessing: '{question}'")
-#         if input_data.get("subject"):
-#             print(f"Subject filter: {input_data['subject']}")
-
-#         try:
-#             result = app.invoke(input=input_data)
-
-#             # Check again if graph flagged conversational
-#             if result.get("is_conversational", False):
-#                 print("\n" + result.get("generation", "Hello! How can I help you?"))
-#                 continue
-
-#             print("\n" + "="*50)
-#             print("ANSWER:")
-#             print("="*50)
-#             print(result.get("generation", "No answer generated"))
-
-#             sources = result.get("sources", [])
-#             if sources:
-#                 print("\n" + "="*50)
-#                 print("SOURCES:")
-#                 print("="*50)
-#                 formatted_sources = format_sources_for_display(sources)
-#                 print(formatted_sources)
-
-#             print("="*50)
-
-#         except Exception as e:
-#             print(f"❌ Error: {e}")
-#             print("💡 Try asking a more specific question!")
-
-
-# if __name__ == "__main__":
-#     main()
-
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from typing import Dict, Any
+import os
 from dotenv import load_dotenv
+
+import config  # This loads environment variables
+
+# Import your existing systems
+from graph.graph import app as rag_app
+from app2 import QuizSystem
+from app3 import FlashcardSystem
+
+# Import API routers
+from api.chat import router as chat_router
+from api.quiz import router as quiz_router
+from api.flashcard import router as flashcard_router
+from api.models import *
 
 load_dotenv()
 
-from graph.graph import app
-from graph.utils.source_extractor import format_sources_for_display
-from graph.utils.conversational_detector import detect_conversational_query
-from graph.utils.conversational_responses import generate_conversational_response
-from graph.state import GraphState
-from app2 import QuizSystem  # Quiz Generation System
-from app3 import FlashcardSystem  # Flashcard Generation System
+# Global instances
+quiz_system = None
+flashcard_system = None
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    global quiz_system, flashcard_system
+    print("Initializing systems...")
+    
+    try:
+        quiz_system = QuizSystem()
+        flashcard_system = FlashcardSystem()
+        # rag_app = rag_graph  # Store the graph
+        print("Systems initialized successfully")
+    except Exception as e:
+        print(f"Error initializing systems: {e}")
+        raise
+    
+    yield
+    
+    # Shutdown
+    print("Shutting down...")
 
-def rag_system():
-    print("=== Advanced RAG with Subject Filtering ===")
-    print("Available subjects: DataMining, Network")
-    print("Leave subject empty for general search")
-    print("💡 Tip: Ask specific questions for better results!")
-    print("-" * 50)
+# Create FastAPI app
+app = FastAPI(
+    title="Educational RAG API",
+    description="Backend API for RAG Chat, Quiz Generation, and Flashcard System",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
-    valid_subjects = ["DataMining", "Network"]
-    subject = None
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Next.js default ports
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    # Let the user pick subject first
-    while True:
-        subject_choice = input("Select subject (DataMining/Network or press Enter for general): ").strip()
-        if not subject_choice:  # General mode
-            subject = None
-            print("Using general search (no subject filter).")
-            break
-        elif subject_choice in valid_subjects:
-            subject = subject_choice
-            print(f"Subject filter set to: {subject}")
-            break
-        else:
-            print(f"⚠ '{subject_choice}' is not a recognized subject. Available: {valid_subjects}")
+# Dependency to get systems
+def get_quiz_system() -> QuizSystem:
+    if quiz_system is None:
+        raise HTTPException(status_code=500, detail="Quiz system not initialized")
+    return quiz_system
 
-    # Main Q&A loop
-    while True:
-        question = input("\nEnter your question (or 'quit' to exit): ").strip()
+def get_flashcard_system() -> FlashcardSystem:
+    if flashcard_system is None:
+        raise HTTPException(status_code=500, detail="Flashcard system not initialized")
+    return flashcard_system
 
-        if question.lower() == 'quit':
-            print("Exiting RAG System 👋")
-            break
-          
-        if not question:
-            print("Please enter a valid question.")
-            continue
-        
-        detection = detect_conversational_query(question)
+def get_rag_app():
+    return rag_app
 
-        input_data = {
-            "question": question,
-            "loop_count": 0,
-            "is_conversational": detection["is_conversational"],
-        }
+# Include routers
+app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
+app.include_router(quiz_router, prefix="/api/quiz", tags=["quiz"])
+app.include_router(flashcard_router, prefix="/api/flashcard", tags=["flashcard"])
 
-        # If conversational → handle directly
-        if detection["is_conversational"]:
-            state = GraphState(question=question)
-            result = generate_conversational_response(state)
-            print("\n" + result["generation"])
-            continue
+@app.get("/")
+async def root():
+    return {"message": "Educational RAG API is running"}
 
-        if subject:
-            input_data["subject"] = subject
-
-        print(f"\nProcessing: '{question}'")
-        if input_data.get("subject"):
-            print(f"Subject filter: {input_data['subject']}")
-
-        try:
-            result = app.invoke(input=input_data)
-
-            # Check again if graph flagged conversational
-            if result.get("is_conversational", False):
-                print("\n" + result.get("generation", "Hello! How can I help you?"))
-                continue
-
-            print("\n" + "="*50)
-            print("ANSWER:")
-            print("="*50)
-            print(result.get("generation", "No answer generated"))
-
-            sources = result.get("sources", [])
-            if sources:
-                print("\n" + "="*50)
-                print("SOURCES:")
-                print("="*50)
-                formatted_sources = format_sources_for_display(sources)
-                print(formatted_sources)
-
-            print("="*50)
-
-        except Exception as e:
-            print(f"❌ Error: {e}")
-            print("💡 Try asking a more specific question!")
-
-
-def main():
-    quiz_system = QuizSystem()
-    flashcard_system = FlashcardSystem()
-
-    while True:
-        print("\n📚 Educational Systems Controller")
-        print("1️⃣  Q&A (RAG System)")
-        print("2️⃣  Quiz System")
-        print("3️⃣  Flashcard System")
-        print("4️⃣  Quit")
-        
-        choice = input("\nSelect system (1-4): ").strip()
-
-        if choice == '1':
-            print("\nLaunching Q&A RAG System...")
-            rag_system()
-        elif choice == '2':
-            print("\nLaunching Quiz System...")
-            quiz_system.interactive_mode()
-        elif choice == '3':
-            print("\nLaunching Flashcard System...")
-            flashcard_system.interactive_mode()
-        elif choice == '4':
-            print("Thank you for using the Educational Systems! 👋")
-            break
-        else:
-            print("⚠ Invalid choice. Please select 1-4.")
-
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "rag_system": "initialized",
+        "quiz_system": "initialized" if quiz_system else "not initialized",
+        "flashcard_system": "initialized" if flashcard_system else "not initialized"
+    }
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
