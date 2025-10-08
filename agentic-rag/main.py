@@ -11,11 +11,13 @@ import config  # This loads environment variables
 from graph.graph import app as rag_app
 from app2 import QuizSystem
 from app3 import FlashcardSystem
+from proctoring import ProctoringSystem
 
 # Import API routers
 from api.chat import router as chat_router
 from api.quiz import router as quiz_router
 from api.flashcard import router as flashcard_router
+from api.proctoring import router as proctoring_router, set_proctoring_system
 from api.models import *
 
 load_dotenv()
@@ -23,6 +25,7 @@ load_dotenv()
 # Global instances
 quiz_system = None
 flashcard_system = None
+proctoring_system = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -33,6 +36,8 @@ async def lifespan(app: FastAPI):
     try:
         quiz_system = QuizSystem()
         flashcard_system = FlashcardSystem()
+        proctoring_system = ProctoringSystem()
+        set_proctoring_system(proctoring_system)
         # rag_app = rag_graph  # Store the graph
         print("Systems initialized successfully")
     except Exception as e:
@@ -43,6 +48,10 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     print("Shutting down...")
+    if proctoring_system and proctoring_system.video_feed_active:
+        print("  Stopping proctoring system...")
+        proctoring_system.stop_proctoring()
+    print("✓ Shutdown complete")
 
 # Create FastAPI app
 app = FastAPI(
@@ -72,6 +81,11 @@ def get_flashcard_system() -> FlashcardSystem:
         raise HTTPException(status_code=500, detail="Flashcard system not initialized")
     return flashcard_system
 
+def get_proctoring_system() -> ProctoringSystem:
+    if proctoring_system is None:
+        raise HTTPException(status_code=500, detail="Proctoring system not initialized")
+    return proctoring_system
+
 def get_rag_app():
     return rag_app
 
@@ -79,6 +93,7 @@ def get_rag_app():
 app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
 app.include_router(quiz_router, prefix="/api/quiz", tags=["quiz"])
 app.include_router(flashcard_router, prefix="/api/flashcard", tags=["flashcard"])
+app.include_router(proctoring_router, prefix="/api/proctoring", tags=["Proctoring"])
 
 @app.get("/")
 async def root():
