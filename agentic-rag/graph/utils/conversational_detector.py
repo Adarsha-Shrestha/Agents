@@ -20,18 +20,26 @@ structured_llm = llm.with_structured_output(QueryType)
 
 system = """You are an expert at classifying user queries. Determine if a query is:
 
-1. CONVERSATIONAL: Simple greetings (hello, hi, how are you), casual chat, social interactions, or pleasantries
-2. QUESTION: Requests for factual information, explanations, or knowledge
+1. CONVERSATIONAL: 
+   - Simple greetings (hello, hi, how are you), casual chat, social interactions, or pleasantries
+   - Questions or topics that are *outside the given subject domain*
+   - General small talk or unrelated inquiries (e.g., "what is the weather", "how old are you", "tell me a joke")
 
-Examples:
+2. QUESTION: 
+   - Requests for factual information, explanations, or knowledge *strictly within the given subject domain*.
+
+Given subject: {subject}
+
+Examples (assuming subject = "AI"):
 - "hello" → conversational: true, question: false  
-- "hi there" → conversational: true, question: false
-- "how are you?" → conversational: true, question: false
-- "what is classification?" → conversational: false, question: true
-- "explain TCP protocol" → conversational: false, question: true
-- "thanks" → conversational: true, question: false
+- "what is weather?" → conversational: true, question: false  
+- "tell me about cats" → conversational: true, question: false  
+- "what is classification in AI?" → conversational: false, question: true  
+- "explain neural networks" → conversational: false, question: true  
+- "thanks" → conversational: true, question: false  
 
-Be strict: only mark as question if it genuinely seeks factual information."""
+Be strict: mark as question **only** if it is clearly a factual query about the given subject.
+"""
 
 query_classifier_prompt = ChatPromptTemplate.from_messages([
     ("system", system),
@@ -41,7 +49,7 @@ query_classifier_prompt = ChatPromptTemplate.from_messages([
 query_classifier = query_classifier_prompt | structured_llm
 
 
-def detect_conversational_query(query: str) -> Dict[str, bool]:
+def detect_conversational_query(query: str, subject: str) -> Dict[str, bool]:
     """
     Detect if a query is conversational or informational
     
@@ -51,7 +59,7 @@ def detect_conversational_query(query: str) -> Dict[str, bool]:
     Returns:
         Dict with is_conversational and is_question flags
     """
-    result = query_classifier.invoke({"query": query})
+    result = query_classifier.invoke({"query": query, "subject": subject})
     return {
         "is_conversational": result.is_conversational,
         "is_question": result.is_question

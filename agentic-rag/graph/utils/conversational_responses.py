@@ -14,30 +14,31 @@ def generate_conversational_response(state: GraphState) -> Dict[str, Any]:
         Updated state with conversational response
     """
     question = state["question"].lower().strip()
+    subject = state.get("subject", "your subject")
     
     # Define response patterns
     greeting_responses = [
-        "Hello! I'm here to help you with questions about DataMining, Networks, or general topics. What would you like to know?",
-        "Hi there! I can help you find information from your study materials or search the web. What's your question?",
-        "Hello! Ready to help with your DataMining and Network questions, or anything else you'd like to know.",
+        f"Hello! I'm here to help you with questions about {subject}. What would you like to know?",
+        f"Hi there! I can help you understand topics related to {subject}. What's your question?",
+        f"Hello! Ready to assist you with {subject}. What do you want to explore today?",
     ]
     
     how_are_you_responses = [
-        "I'm doing well, thank you! I'm here and ready to help you with any questions about DataMining, Networks, or other topics.",
-        "I'm great! How can I assist you today? I can help with DataMining, Network concepts, or search for other information.",
-        "I'm doing fine, thanks for asking! What can I help you learn about today?",
+        f"I'm doing well, thank you! I'm ready to help with anything about {subject}.",
+        f"I'm great! How can I assist you today with {subject} topics?",
+        f"I'm doing fine, thanks for asking! What can I help you learn about in {subject}?",
     ]
     
     thanks_responses = [
-        "You're welcome! Feel free to ask if you have any more questions about DataMining, Networks, or anything else.",
-        "Happy to help! Let me know if you need assistance with anything else.",
-        "Glad I could help! Ask me anything else you'd like to know.",
+        f"You're welcome! Feel free to ask more questions about {subject}.",
+        f"Happy to help! Let me know if you’d like to learn more about {subject}.",
+        f"Glad I could help! Ask me anything else about {subject} or related concepts.",
     ]
     
     general_responses = [
-        "I'm here to help! Please ask me a specific question about DataMining, Networks, or any other topic you're curious about.",
-        "Feel free to ask me questions about your study materials or anything else you'd like to know!",
-        "I'm ready to assist you! What would you like to learn about today?",
+        f"I'm here to help! Please ask a specific question about {subject}.",
+        f"Feel free to ask me anything about {subject}. I'm ready to explain!",
+        f"I'm ready to assist you with {subject}. What would you like to know?",
     ]
     
     # Match patterns and generate responses
