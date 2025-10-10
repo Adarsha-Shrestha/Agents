@@ -37,8 +37,8 @@ interface QuizQuestion {
 interface Quiz {
   session_id: string
   questions: QuizQuestion[]
-  subject: string
-  difficulty: string
+  subject?: string
+  difficulty?: string
 }
 
 export default function ProctoredQuizPage() {
@@ -97,7 +97,7 @@ export default function ProctoredQuizPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: username.trim(),
-          exam_duration: 600, // 10 minutes
+          exam_duration: 60, // 10 minutes
         }),
       })
 
@@ -110,8 +110,8 @@ export default function ProctoredQuizPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          topic,
-          subject,
+          topic: topic,
+          subject: subject,
           num_questions: numQuestions,
         }),
       })
@@ -121,9 +121,18 @@ export default function ProctoredQuizPage() {
       }
 
       const quizData = await quizResponse.json()
-      setQuiz(quizData)
-      setProctoringActive(true)
-      setQuizStarted(true)
+      
+      // Handle the API response structure - quiz_data is the array of questions
+      if (quizData.success && quizData.quiz_data) {
+        setQuiz({
+          session_id: quizData.quiz_id || "",
+          questions: quizData.quiz_data,
+        })
+        setProctoringActive(true)
+        setQuizStarted(true)
+      } else {
+        throw new Error("Invalid quiz data received")
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to start quiz")
       console.error("[v0] Error starting quiz:", err)
@@ -163,18 +172,17 @@ export default function ProctoredQuizPage() {
     setLoading(true)
 
     try {
-      const response = await fetch(`${API_BASE}/quiz/session/${quiz.session_id}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: finalAnswers }),
+      // Calculate score locally by comparing answers with correct answers
+      let correctCount = 0
+      quiz.questions.forEach((question, index) => {
+        const userAnswer = finalAnswers[index]
+        if (userAnswer === question.correct_answer) {
+          correctCount++
+        }
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to submit quiz")
-      }
-
-      const result = await response.json()
-      setScore(result.score)
+      const calculatedScore = Math.round((correctCount / quiz.questions.length) * 100)
+      setScore(calculatedScore)
       await handleStopProctoring()
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to submit quiz")
@@ -268,12 +276,12 @@ export default function ProctoredQuizPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground mb-2">Username</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Topic</label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  placeholder="Enter your username"
+                  placeholder="Enter Topic"
                   className="w-full px-4 py-2 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
@@ -352,7 +360,17 @@ export default function ProctoredQuizPage() {
     )
   }
 
-  if (!quiz) return null
+  if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-2xl mx-auto py-12">
+          <Card className="p-8 text-center bg-card border-border">
+            <p className="text-muted-foreground">Loading quiz...</p>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   const question = quiz.questions[currentQuestion]
   const progress = ((currentQuestion + 1) / quiz.questions.length) * 100
